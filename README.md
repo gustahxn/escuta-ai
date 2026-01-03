@@ -1,10 +1,8 @@
-ESCUTA AI / music auto matcher
+ESCUTA AI - Recomendador de músicas online
 
 Plataforma minimalista desenvolvida para descobrir novas faixas com base em similaridade musical, conectando o usuário aos seus serviços de streaming favoritos.
-O Projeto
 
 O sistema funciona como um buscador inteligente que analisa uma música selecionada e retorna recomendações precisas. O objetivo é simplificar a jornada de descoberta musical através de uma interface limpa e funcional.
-Tecnologias
 
 O ecossistema é dividido em duas frentes principais:
 

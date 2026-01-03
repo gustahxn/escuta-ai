@@ -1,16 +1,23 @@
-# React + Vite
+ESCUTA AI / music auto matcher
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Plataforma minimalista desenvolvida para descobrir novas faixas com base em similaridade musical, conectando o usuário aos seus serviços de streaming favoritos.
+O Projeto
 
-Currently, two official plugins are available:
+O sistema funciona como um buscador inteligente que analisa uma música selecionada e retorna recomendações precisas. O objetivo é simplificar a jornada de descoberta musical através de uma interface limpa e funcional.
+Tecnologias
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+O ecossistema é dividido em duas frentes principais:
 
-## React Compiler
+    Backend em Go: Utilizado para gerenciar a lógica de integração com a API do Last.fm e o processamento de dados, garantindo uma estrutura robusta e segura para as requisições.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+    Frontend em React: Interface construída com Tailwind CSS para proporcionar uma experiência visual direta, focada no conteúdo e na facilidade de navegação.
 
-## Expanding the ESLint configuration
+Funcionalidades
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+    Pesquisa global de faixas e artistas.
+
+    Gerador de recomendações por similaridade.
+
+    Atalhos integrados para YouTube, Spotify e Apple Music.
+
+    Interface adaptável para diferentes dispositivos.

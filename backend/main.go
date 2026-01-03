@@ -7,22 +7,53 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"sync"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 )
 
+type CacheItem struct {
+	Data      interface{}
+	Timestamp time.Time
+}
+
+var (
+	cache      = make(map[string]CacheItem)
+	cacheMutex sync.RWMutex
+	ttl        = 30 * time.Minute
+)
+
+func getFromCache(key string) (interface{}, bool) {
+	cacheMutex.RLock()
+	defer cacheMutex.RUnlock()
+	item, found := cache[key]
+	if found && time.Since(item.Timestamp) < ttl {
+		return item.Data, true
+	}
+	return nil, false
+}
+
+func setToCache(key string, data interface{}) {
+	cacheMutex.Lock()
+	defer cacheMutex.Unlock()
+	cache[key] = CacheItem{Data: data, Timestamp: time.Now()}
+}
+
 func main() {
 	_ = godotenv.Load()
 	apiKey := os.Getenv("LASTFM_API_KEY")
 
-	if apiKey == "" {
-		log.Println("AVISO: LASTFM_API_KEY não encontrada no .env")
-	}
-
 	http.HandleFunc("/api/search", func(w http.ResponseWriter, r *http.Request) {
 		query := r.URL.Query().Get("q")
-		log.Printf("Buscando: %s", query)
+		cacheKey := "search:" + query
+
+		if data, found := getFromCache(cacheKey); found {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(data)
+			return
+		}
 
 		apiURL := fmt.Sprintf("http://ws.audioscrobbler.com/2.0/?method=track.search&track=%s&api_key=%s&format=json&limit=10", url.QueryEscape(query), apiKey)
 		
@@ -40,6 +71,7 @@ func main() {
 		matches, _ := res["trackmatches"].(map[string]interface{})
 		tracks := matches["track"]
 
+		setToCache(cacheKey, tracks)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(tracks)
 	})
@@ -47,11 +79,21 @@ func main() {
 	http.HandleFunc("/api/recommend", func(w http.ResponseWriter, r *http.Request) {
 		artist := r.URL.Query().Get("artist")
 		track := r.URL.Query().Get("track")
-		log.Printf("Similares para: %s - %s", artist, track)
+		cacheKey := "rec:" + artist + ":" + track
+
+		if data, found := getFromCache(cacheKey); found {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(data)
+			return
+		}
 
 		apiURL := fmt.Sprintf("http://ws.audioscrobbler.com/2.0/?method=track.getsimilar&artist=%s&track=%s&api_key=%s&format=json&limit=30", url.QueryEscape(artist), url.QueryEscape(track), apiKey)
 		
-		resp, _ := http.Get(apiURL)
+		resp, err := http.Get(apiURL)
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
 		defer resp.Body.Close()
 
 		var result map[string]interface{}
@@ -60,12 +102,11 @@ func main() {
 		similars, _ := result["similartracks"].(map[string]interface{})
 		tracks := similars["track"]
 
+		setToCache(cacheKey, tracks)
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(tracks)
 	})
 
 	handler := cors.AllowAll().Handler(http.DefaultServeMux)
-
-	fmt.Println("Backend 'Escuta Aí' rodando em http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", handler))
 }

@@ -14,7 +14,9 @@ function App() {
     setRecommendations([]);
     setSelectedTrack(null);
     try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+      const res = await fetch(
+        `http://localhost:8080/api/search?q=${encodeURIComponent(query)}`
+      );
       const data = await res.json();
       setSearchResults(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -30,7 +32,7 @@ function App() {
     setSearchResults([]);
     try {
       const res = await fetch(
-        `/api/recommend?artist=${encodeURIComponent(
+        `http://localhost:8080/api/recommend?artist=${encodeURIComponent(
           track.artist
         )}&track=${encodeURIComponent(track.name)}`
       );
@@ -92,7 +94,7 @@ function App() {
               <div
                 key={i}
                 onClick={() => selectTrack(t)}
-                className="group flex justify-between items-center p-8 bg-black text-white border border-gray-800 hover:bg-zinc-900 hover:border-gray-700 cursor-pointer transition-all"
+                className="group flex justify-between items-center p-8 bg-black hover:cursor-pointer text-white border border-gray-800 hover:border-gray-700 cursor-pointer transition-all"
               >
                 <div>
                   <h3 className="font-bold text-xl mb-1">{t.name}</h3>
@@ -127,7 +129,7 @@ function App() {
                 {recommendations.map((track, i) => (
                   <div
                     key={i}
-                    className="group bg-black text-white border border-gray-800 p-8 hover:bg-zinc-900 hover:border-gray-700 hover:shadow-2xl transition-all"
+                    className="group bg-black text-white border border-gray-800 p-8 hover:cursor-pointer hover:border-gray-700 hover:shadow-2xl transition-all"
                   >
                     <div className="flex justify-between items-start mb-4">
                       <span className="text-xs font-bold text-gray-300 uppercase tracking-wider">
@@ -149,7 +151,7 @@ function App() {
                         rel="noopener noreferrer"
                         className="flex-1 flex items-center justify-center gap-2 text-xs font-black bg-white text-black py-3 hover:bg-gray-200 transition-colors no-underline"
                       >
-                        <Youtube size={16} />{" "}
+                        <Youtube size={16} />
                         <span className="hidden sm:inline">YOUTUBE</span>
                       </a>
                       <a
@@ -160,7 +162,7 @@ function App() {
                         rel="noopener noreferrer"
                         className="flex-1 flex items-center justify-center gap-2 text-xs font-black bg-white text-black py-3 hover:bg-gray-200 transition-colors no-underline"
                       >
-                        <Music2 size={16} />{" "}
+                        <Music2 size={16} />
                         <span className="hidden sm:inline">SPOTIFY</span>
                       </a>
                       <a
@@ -171,7 +173,7 @@ function App() {
                         rel="noopener noreferrer"
                         className="flex-1 flex items-center justify-center gap-2 text-xs font-black bg-white text-black py-3 hover:bg-gray-200 transition-colors no-underline"
                       >
-                        <Play size={16} />{" "}
+                        <Play size={16} />
                         <span className="hidden sm:inline">APPLE</span>
                       </a>
                     </div>
@@ -181,7 +183,8 @@ function App() {
             ) : (
               <div className="text-center py-20 border-2 border-dashed border-gray-200">
                 <p className="text-lg font-medium text-gray-600 uppercase tracking-widest">
-                  Nenhuma recomendação encontrada.
+                  Nenhuma recomendação similar encontrada. Certeza de que é a
+                  faixa certa?
                 </p>
               </div>
             )}

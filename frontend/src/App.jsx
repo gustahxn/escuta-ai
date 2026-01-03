@@ -2,6 +2,8 @@ import { useState, useCallback } from "react";
 import { Youtube, Music2, Play } from "lucide-react";
 
 function App() {
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
+  
   const [query, setQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
@@ -15,7 +17,7 @@ function App() {
     setSelectedTrack(null);
     try {
       const res = await fetch(
-        `http://localhost:8080/api/search?q=${encodeURIComponent(query)}`
+        `${API_URL}/api/search?q=${encodeURIComponent(query)}`
       );
       const data = await res.json();
       setSearchResults(Array.isArray(data) ? data : []);
@@ -24,7 +26,7 @@ function App() {
     } finally {
       setLoading(false);
     }
-  }, [query]);
+  }, [query, API_URL]);
 
   const selectTrack = async (track) => {
     setLoading(true);
@@ -32,7 +34,7 @@ function App() {
     setSearchResults([]);
     try {
       const res = await fetch(
-        `http://localhost:8080/api/recommend?artist=${encodeURIComponent(
+        `${API_URL}/api/recommend?artist=${encodeURIComponent(
           track.artist
         )}&track=${encodeURIComponent(track.name)}`
       );
@@ -154,7 +156,7 @@ function App() {
                         <Youtube size={16} />
                         <span className="hidden sm:inline">YOUTUBE</span>
                       </a>
-                      <a
+                      <a 
                         href={`https://open.spotify.com/search/${encodeURIComponent(
                           track.artist?.name + " " + track.name
                         )}`}
@@ -165,7 +167,7 @@ function App() {
                         <Music2 size={16} />
                         <span className="hidden sm:inline">SPOTIFY</span>
                       </a>
-                      <a
+                      <a 
                         href={`https://music.apple.com/br/search?term=${encodeURIComponent(
                           track.artist?.name + " " + track.name
                         )}`}

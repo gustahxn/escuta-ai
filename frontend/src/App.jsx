@@ -194,7 +194,7 @@ function App() {
         {!loading && !selectedTrack && searchResults.length === 0 && (
           <div className="text-center py-40">
             <h2 className="text-8xl font-black tracking-tighter">
-              MERGULHA NO SOM
+              MERGULHA NO SOM.
             </h2>
           </div>
         )}

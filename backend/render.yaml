@@ -7,3 +7,5 @@ services:
     envVars:
       - key: LASTFM_API_KEY
         sync: false
+      - key: PORT
+        value: 8080

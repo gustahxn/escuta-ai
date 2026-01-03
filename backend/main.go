@@ -139,7 +139,7 @@ func main() {
             "http://localhost:3000",
             "http://localhost:5173",
             "https://*.vercel.app",  
-            "https://seu-dominio.vercel.app", 
+            "https://escuta-ai.vercel.app", 
         },
         AllowedMethods: []string{"GET", "POST", "OPTIONS"},
         AllowedHeaders: []string{"*"},

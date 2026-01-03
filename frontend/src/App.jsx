@@ -14,9 +14,7 @@ function App() {
     setRecommendations([]);
     setSelectedTrack(null);
     try {
-      const res = await fetch(
-        `http://localhost:8080/api/search?q=${encodeURIComponent(query)}`
-      );
+      const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
       const data = await res.json();
       setSearchResults(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -32,7 +30,7 @@ function App() {
     setSearchResults([]);
     try {
       const res = await fetch(
-        `http://localhost:8080/api/recommend?artist=${encodeURIComponent(
+        `/api/recommend?artist=${encodeURIComponent(
           track.artist
         )}&track=${encodeURIComponent(track.name)}`
       );
@@ -151,7 +149,7 @@ function App() {
                         rel="noopener noreferrer"
                         className="flex-1 flex items-center justify-center gap-2 text-xs font-black bg-white text-black py-3 hover:bg-gray-200 transition-colors no-underline"
                       >
-                        <Youtube size={16} />
+                        <Youtube size={16} />{" "}
                         <span className="hidden sm:inline">YOUTUBE</span>
                       </a>
                       <a
@@ -162,7 +160,7 @@ function App() {
                         rel="noopener noreferrer"
                         className="flex-1 flex items-center justify-center gap-2 text-xs font-black bg-white text-black py-3 hover:bg-gray-200 transition-colors no-underline"
                       >
-                        <Music2 size={16} />
+                        <Music2 size={16} />{" "}
                         <span className="hidden sm:inline">SPOTIFY</span>
                       </a>
                       <a
@@ -173,7 +171,7 @@ function App() {
                         rel="noopener noreferrer"
                         className="flex-1 flex items-center justify-center gap-2 text-xs font-black bg-white text-black py-3 hover:bg-gray-200 transition-colors no-underline"
                       >
-                        <Play size={16} />
+                        <Play size={16} />{" "}
                         <span className="hidden sm:inline">APPLE</span>
                       </a>
                     </div>
@@ -183,8 +181,7 @@ function App() {
             ) : (
               <div className="text-center py-20 border-2 border-dashed border-gray-200">
                 <p className="text-lg font-medium text-gray-600 uppercase tracking-widest">
-                  Nenhuma recomendação similar encontrada. Certeza de que é a
-                  faixa certa?
+                  Nenhuma recomendação encontrada.
                 </p>
               </div>
             )}

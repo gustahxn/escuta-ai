@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react";
-import { Youtube, Music2, Play, HelpCircle } from "lucide-react";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { Youtube, Music2, Play, HelpCircle, X } from "lucide-react";
 
 function App() {
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
@@ -9,6 +9,24 @@ function App() {
   const [recommendations, setRecommendations] = useState([]);
   const [selectedTrack, setSelectedTrack] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+
+  const inputRef = useRef(null);
+  const helpRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (helpRef.current && !helpRef.current.contains(e.target)) {
+        setHelpOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, []);
 
   const search = useCallback(async () => {
     if (!query.trim()) return;
@@ -27,6 +45,14 @@ function App() {
       setLoading(false);
     }
   }, [query, API_URL]);
+
+  const clearSearch = () => {
+    setQuery("");
+    setSearchResults([]);
+    setRecommendations([]);
+    setSelectedTrack(null);
+    inputRef.current?.focus();
+  };
 
   const selectTrack = async (track) => {
     setLoading(true);
@@ -65,40 +91,61 @@ function App() {
           <div className="flex items-center gap-3 w-full md:w-auto">
             <div className="flex flex-1 md:w-auto bg-gray-50 px-5 py-3.5 focus-within:bg-white border border-gray-300 focus-within:border-gray-900 transition-all">
               <input
+                ref={inputRef}
                 className="bg-transparent outline-none px-2 w-full md:w-80 text-base font-medium placeholder:text-gray-400"
                 placeholder="Pesquise uma música..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && search()}
               />
+
+              {query && (
+                <button
+                  onClick={clearSearch}
+                  className="text-gray-400 hover:text-black transition-colors px-1"
+                  aria-label="Limpar pesquisa"
+                >
+                  <X size={16} />
+                </button>
+              )}
+
               <button
                 onClick={search}
-                className="text-xs font-black uppercase tracking-wider px-3 cursor-pointer transition-opacity"
+                className="text-xs text-gray-500 uppercase tracking-wider px-3 font-medium cursor-pointer transition-opacity"
               >
                 Buscar
               </button>
             </div>
 
-            <div className="relative group">
-              <div className="h-[52px] w-[52px] bg-gray-50 border border-gray-300 transition-all flex items-center justify-center cursor-pointer">
-                <HelpCircle
-                  size={20}
-                  className="text-black transition-colors"
-                />
-              </div>
+            <div ref={helpRef} className="relative">
+              <button
+                onClick={() => setHelpOpen((v) => !v)}
+                className="h-[52px] w-[52px] bg-gray-50 border border-gray-300 transition-all flex items-center justify-center cursor-pointer"
+                aria-label="Ajuda"
+                aria-expanded={helpOpen}
+              >
+                <HelpCircle size={20} className="text-black" />
+              </button>
 
-              <div className="absolute right-0 top-full pt-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-30">
-                <div className="w-64 bg-black text-white p-5 border border-black shadow-2xl">
+              <div
+                className={`
+                  absolute right-0 top-full pt-2 z-30
+                  transition-all duration-300 transform scale-95 opacity-0
+                  ${helpOpen ? "opacity-100 scale-100 visible" : "invisible"}
+                  md:group-hover:opacity-100 md:group-hover:scale-100 md:group-hover:visible
+                `}
+              >
+                <div className="w-64 bg-black text-white p-5 border border-black shadow-2xl rounded-xl">
                   <p className="text-[10px] font-black uppercase tracking-[0.2em] mb-2 text-gray-200">
                     informação
                   </p>
                   <p className="text-xs font-medium leading-relaxed">
-                    A primeira pesquisa após um longo período de inatividade pode
-                    demorar de 30 - 50 segundos. Nos desculpe.
+                    A primeira pesquisa após um longo período de inatividade
+                    pode demorar de 30 - 50 segundos. Nos desculpe.
                   </p>
                 </div>
               </div>
-            </div> 
+            </div>
           </div>
         </div>
       </nav>
@@ -156,17 +203,17 @@ function App() {
                     key={i}
                     className="group bg-black text-white border border-gray-800 p-8 hover:border-gray-700 hover:shadow-2xl transition-all"
                   >
-                    <div className="flex justify-between items-start mb-4">
-                      <span className="text-xs font-bold text-gray-300 uppercase tracking-wider">
-                        Sugestão #{i + 1}
-                      </span>
-                    </div>
-                    <h4 className="font-bold text-2xl leading-tight mb-2">
+                    <span className="text-xs font-bold text-gray-300 uppercase tracking-wider">
+                      Sugestão #{i + 1}
+                    </span>
+
+                    <h4 className="font-bold text-2xl leading-tight mt-2 mb-2">
                       {track.name}
                     </h4>
                     <p className="text-gray-300 font-medium text-lg mb-6">
                       {track.artist?.name}
                     </p>
+
                     <div className="flex gap-2">
                       <a
                         href={`https://www.youtube.com/results?search_query=${encodeURIComponent(
@@ -174,32 +221,34 @@ function App() {
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 flex items-center justify-center gap-2 text-xs font-black bg-white text-black py-3 hover:bg-gray-200 transition-colors no-underline"
+                        className="flex-1 flex items-center justify-center gap-2 text-xs font-black bg-white text-black py-3 hover:bg-gray-200 transition-colors"
                       >
                         <Youtube size={16} />
-                        <span className="hidden sm:inline">YOUTUBE</span>
+                        YOUTUBE
                       </a>
+
                       <a
                         href={`https://open.spotify.com/search/${encodeURIComponent(
                           track.artist?.name + " " + track.name
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 flex items-center justify-center gap-2 text-xs font-black bg-white text-black py-3 hover:bg-gray-200 transition-colors no-underline"
+                        className="flex-1 flex items-center justify-center gap-2 text-xs font-black bg-white text-black py-3 hover:bg-gray-200 transition-colors"
                       >
                         <Music2 size={16} />
-                        <span className="hidden sm:inline">SPOTIFY</span>
+                        SPOTIFY
                       </a>
+
                       <a
                         href={`https://music.apple.com/br/search?term=${encodeURIComponent(
                           track.artist?.name + " " + track.name
                         )}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-1 flex items-center justify-center gap-2 text-xs font-black bg-white text-black py-3 hover:bg-gray-200 transition-colors no-underline"
+                        className="flex-1 flex items-center justify-center gap-2 text-xs font-black bg-white text-black py-3 hover:bg-gray-200 transition-colors"
                       >
                         <Play size={16} />
-                        <span className="hidden sm:inline">APPLE</span>
+                        APPLE
                       </a>
                     </div>
                   </div>
